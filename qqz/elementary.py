@@ -117,3 +117,30 @@ def ctrl_multi_modN(a: int, N: int) -> Gate:
     qc.x(ctrl[0])
 
     return qc.to_gate()
+
+def ax_modN(a: int, N: int) -> Gate:
+    N_val = N
+    N_len = int(np.ceil(np.log2(N)))
+
+    qubits = QuantumRegister(10 * N_len - 2)
+    x, left_qubits = qubits[:N_len], qubits[N_len:]
+    x_for_ctrl_multi_modN_gate, left_qubits = left_qubits[:N_len], left_qubits[N_len:]
+    y, left_qubits = left_qubits[:2 * N_len], left_qubits[2 * N_len:]
+    xx, left_qubits = left_qubits[:2 * N_len - 1], left_qubits[2 * N_len - 1:]
+    c, left_qubits = left_qubits[:2 * N_len - 1], left_qubits[2 * N_len - 1:]
+    N, left_qubits = left_qubits[:2 * N_len - 1], left_qubits[2 * N_len - 1:]
+    t, left_qubits = left_qubits[:1], qubits[1:]
+
+    qc = QuantumCircuit(qubits)
+
+    qc.x(x_for_ctrl_multi_modN_gate[0])
+    for i in range(N_len):
+        ctrl_multi_modN_gate = ctrl_multi_modN(a ** (2 ** i) % N_val, N_val)
+        ctrl_multi_modN_gate_dag = ctrl_multi_modN_gate.inverse()
+
+        qc.append(ctrl_multi_modN_gate, [x[i]] + x_for_ctrl_multi_modN_gate + y + xx + c + N + t)
+        for j in range(N_len):
+            qc.cswap(x[i], x_for_ctrl_multi_modN_gate[j], y[j])
+        qc.append(ctrl_multi_modN_gate_dag, [x[i]] + x_for_ctrl_multi_modN_gate + y + xx + c + N + t)
+
+    return qc.to_gate()
