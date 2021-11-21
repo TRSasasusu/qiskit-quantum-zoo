@@ -15,7 +15,7 @@ from qft import qft
 from elementary import ax_modM
 
 
-def shor(M: int, a: Optional[int] = None, show_hist=True, use_only_period=False):
+def shor(M: int, a: Optional[int] = None, N_len: Optional[int] = None, show_hist: bool = True, use_only_period: bool = False):
     if a is None:
         random.randint(2, M - 1)
     gcd = math.gcd(a, M)
@@ -23,7 +23,8 @@ def shor(M: int, a: Optional[int] = None, show_hist=True, use_only_period=False)
         print(f'Answer is found in only classical computation: {gcd}')
         return gcd
 
-    N_len = int(np.ceil(np.log2(M ** 2)))
+    if N_len is None:
+        N_len = int(np.ceil(np.log2(M ** 2)))
     N = 2 ** N_len
     #qc = QuantumCircuit(10 * N_len - 2, 2 * N_len)
     qc = QuantumCircuit(10 * N_len - 2, N_len)
@@ -75,5 +76,6 @@ def shor(M: int, a: Optional[int] = None, show_hist=True, use_only_period=False)
 
 if __name__ == '__main__':
     #print(shor(M=8, a=3))
-    print(shor(M=57, a=5))
-    #print(shor(M=7, a=3, use_only_period=True))
+    #print(shor(M=57, a=5))
+    #print(shor(M=7, a=3, N_len=3, use_only_period=True))
+    print(shor(M=7, a=3, use_only_period=True))
