@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from sympy import gcdex
 from qiskit import QuantumCircuit, Aer, transpile, assemble
 from qiskit.visualization import plot_histogram
+from sympy import Rational
+from sympy.ntheory.continued_fraction import continued_fraction, continued_fraction_convergents
 
 from qft import qft
 from elementary import ax_modM
@@ -13,8 +15,8 @@ from shor import shor
 
 def discrete_log(alpha: int, beta: int, p: int, N_len: Optional[int] = None, show_hist: Optional[bool] = True) -> int:
     # find q s.t. alpha^q = 1
-    q = shor(M=p, a=alpha, use_only_period=True, show_hist=False)
-    print(f'q is {q} ({alpha}^{q} = 1)')
+    #q = shor(M=p, a=alpha, use_only_period=True, show_hist=False)
+    #print(f'q is {q} ({alpha}^{q} = 1)')
 
     # find d s.t. alpha^d = beta
     if N_len is None:
@@ -44,15 +46,23 @@ def discrete_log(alpha: int, beta: int, p: int, N_len: Optional[int] = None, sho
     for measured_key, _ in sorted(hist.items(), key=lambda x: x[1], reverse=True):
         x = int(measured_key[-N_len:], 2)
         y = int(measured_key[-N_len * 2:-N_len], 2)
-        if math.gcd(x, N) > 1:
-            print(f'x:{x},N:{N},gcd:{math.gcd(x,N)}')
-            continue
 
-        d_0, d_1, _ = gcdex(x, N)
-        maybe_d = x * d_0 * y % p
-        print(f'maybe_d: {maybe_d}, x: {x}, y: {y}')
-        if alpha ** maybe_d % p == beta:
-            return maybe_d
+        for fraction in continued_fraction_convergents(continued_fraction(Rational(y, N))):
+            if fraction.denominator == p - 1:
+                yy = fraction.numerator
+            elif (p - 1) % fraction.denominator == 0:
+                yy = fraction.numerator * ((p - 1) // fraction.denominator)
+            else:
+                continue
+
+            c = (x * (p - 1) - (x * (p - 1) % N)) / N
+            if c == 0:
+                continue
+            maybe_d = (p - 1 - yy) / c
+            if alpha ** math.floor(maybe_d) % p == beta:
+                return math.floor(maybe_d)
+            if alpha ** math.ceil(maybe_d) % p == beta:
+                return math.ceil(maybe_d)
 
     print('d was not found?!')
 
