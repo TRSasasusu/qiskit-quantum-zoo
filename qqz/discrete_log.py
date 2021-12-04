@@ -14,10 +14,6 @@ from elementary import ax_modM
 from shor import shor
 
 def discrete_log(alpha: int, beta: int, p: int, N_len: Optional[int] = None, show_hist: Optional[bool] = True) -> int:
-    # find q s.t. alpha^q = 1
-    #q = shor(M=p, a=alpha, use_only_period=True, show_hist=False)
-    #print(f'q is {q} ({alpha}^{q} = 1)')
-
     # find d s.t. alpha^d = beta
     if N_len is None:
         N_len = int(np.ceil(np.log2(p ** 2)))
