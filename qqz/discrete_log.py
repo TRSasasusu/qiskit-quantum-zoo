@@ -55,18 +55,23 @@ def discrete_log(alpha: int, beta: int, p: int, N_len: Optional[int] = None, sho
             else:
                 continue
 
-            c = (x * (p - 1) - (x * (p - 1) % N)) / N
+            c = Rational(x * (p - 1) - (x * (p - 1) % N)) / N
             if c == 0:
                 continue
-            maybe_d = (p - 1 - yy) / c
-            if alpha ** math.floor(maybe_d) % p == beta:
-                return math.floor(maybe_d)
-            if alpha ** math.ceil(maybe_d) % p == beta:
-                return math.ceil(maybe_d)
+
+            d, m, _ = gcdex(c, 1 - p)
+            d *= -yy
+            m *= -yy
+            #print(f'x: {x}, y: {y}')
+            if alpha ** d % p == beta:
+                return d
+            d += 1 - p
+            if alpha ** d % p == beta:
+                return d
 
     print('d was not found?!')
 
 if __name__ == '__main__':
-    #print(discrete_log(alpha=3, beta=6, p=7, N_len=3))
-    print(discrete_log(alpha=3, beta=6, p=7))
+    print(discrete_log(alpha=3, beta=6, p=7, N_len=3))
+    #print(discrete_log(alpha=3, beta=6, p=7))
     #discrete_log(alpha=3, beta=1, p=4, N_len=2)
