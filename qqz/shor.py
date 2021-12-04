@@ -1,7 +1,5 @@
 import random
 import math
-from fractions import Fraction
-from itertools import combinations
 from typing import Optional
 
 import numpy as np
@@ -26,20 +24,15 @@ def shor(M: int, a: Optional[int] = None, N_len: Optional[int] = None, show_hist
     if N_len is None:
         N_len = int(np.ceil(np.log2(M ** 2)))
     N = 2 ** N_len
-    #qc = QuantumCircuit(10 * N_len - 2, 2 * N_len)
     qc = QuantumCircuit(10 * N_len - 2, N_len)
-    #qc = QuantumCircuit(10 * N_len - 2, 10 * N_len - 2)
 
     qc.h(range(N_len))
-    #qc.x([0, 1])
 
     qc.append(ax_modM(a=a, M=M, N_len=N_len), range(10 * N_len - 2))
 
     qc.append(qft(n=N_len), range(N_len))
 
-    #qc.measure(range(2 * N_len), range(2 * N_len))
     qc.measure(range(N_len), range(N_len))
-    #qc.measure(range(10 * N_len - 2), range(10 * N_len - 2))
 
     backend = Aer.get_backend('aer_simulator_matrix_product_state')#('aer_simulator')
     qc = transpile(qc, backend)
@@ -75,7 +68,7 @@ def shor(M: int, a: Optional[int] = None, N_len: Optional[int] = None, show_hist
     print('gcd was not found?!')
 
 if __name__ == '__main__':
-    #print(shor(M=8, a=3))
+    print(shor(M=8, a=3))
     #print(shor(M=57, a=5))
     #print(shor(M=7, a=3, N_len=3, use_only_period=True))
-    print(shor(M=7, a=3, use_only_period=True))
+    #print(shor(M=7, a=3, use_only_period=True))

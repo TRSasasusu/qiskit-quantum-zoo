@@ -116,7 +116,7 @@ def ctrl_multi_modM(a: int, M: int, N_len: int) -> Gate:
 
     return qc.to_gate()
 
-def ax_modM(a: int, M: int, N_len: Optional[int] = None) -> Gate:
+def ax_modM(a: int, M: int, N_len: Optional[int] = None, x_0_at_first: bool = True) -> Gate:
     M_val = M
     if N_len is None:
         N_len = int(np.ceil(np.log2(M)))
@@ -132,7 +132,8 @@ def ax_modM(a: int, M: int, N_len: Optional[int] = None) -> Gate:
 
     qc = QuantumCircuit(qubits)
 
-    qc.x(x_for_ctrl_multi_modM_gate[0])
+    if x_0_at_first:
+        qc.x(x_for_ctrl_multi_modM_gate[0])
     for i in range(N_len):
         ctrl_multi_modM_gate = ctrl_multi_modM(pow(a, 2 ** i, M_val), M_val, N_len)
         ctrl_multi_modM_gate_dag = ctrl_multi_modM(pow(a, -2 ** i, M_val), M_val, N_len).inverse()
