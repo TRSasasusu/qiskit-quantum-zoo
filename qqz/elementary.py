@@ -1,5 +1,5 @@
 """
-Implementing arXiv:quant-ph/9511018
+Implementing [arXiv:quant-ph/9511018](https://arxiv.org/abs/quant-ph/9511018)
 """
 
 from typing import Optional
@@ -10,6 +10,12 @@ from qiskit.circuit import Gate
 
 
 def carry() -> Gate:
+    """CARRY. It requires 4 qubits.
+    
+    Returns:
+        its gate
+    """
+
     qc = QuantumCircuit(4)
     qc.ccx(1, 2, 3)
     qc.cx(1, 2)
@@ -17,12 +23,27 @@ def carry() -> Gate:
     return qc.to_gate()
 
 def qsum() -> Gate:
+    """SUM. It requires 3 qubits.
+    
+    Returns:
+        its gate
+    """
+
     qc = QuantumCircuit(3)
     qc.cx(1, 2)
     qc.cx(0, 2)
     return qc.to_gate()
 
 def adder(n: int) -> Gate:
+    r"""ADDER: $a,b\to a,a+b$. It requires $3n+1$ qubits: $a$ uses $n$ qubits, $b$ uses $n+1$ qubits, and $c$ uses $n$ qubits.
+
+    Args:
+      n (int): $n$ bits for representing $a$.
+
+    Returns:
+        its gate
+    """
+
     qubits = QuantumRegister(n + (n + 1) + n)
     a = qubits[:n]
     b = qubits[n:n + (n + 1)]
@@ -45,6 +66,16 @@ def adder(n: int) -> Gate:
     return qc.to_gate()
 
 def adder_modM(M: int, N_len: int) -> Gate:
+    r"""ADDER MOD: $a,b\to a,a+b\mod M$. It requires $4N_\mathit{len}+2$ qubits: $a$ uses $N_\mathit{len}$ qubits, $b$ uses $N_\mathit{len}+1$ qubits, $c$ uses $N_\mathit{len}$ qubits, $M$ uses $N_\mathit{len}$ qubits, and $t$ uses 1 qubit.
+
+    Args:
+        M (int): $N$ in the paper, but we uses $M$ instead.
+        N_len (int): a number of bits for representing $a$.
+
+    Returns:
+        its gate
+    """
+
     M_val = M
 
     qubits = QuantumRegister(N_len + (N_len + 1) + N_len + N_len + 1)
@@ -85,6 +116,17 @@ def adder_modM(M: int, N_len: int) -> Gate:
     return qc.to_gate()
 
 def ctrl_multi_modM(a: int, M: int, N_len: int) -> Gate:
+    r"""Ctrl MULT MOD: $x,0\to x,ax\mod M$ if $c=1$, otherwise $x,0\to x,x$. It requires $9N_\mathit{len}-1$ qubits: $\mathit{ctrl}$ uses 1 qubit, $x$ uses $N_\mathit{len}$ qubits, $y$ uses $2N_\mathit{len}$ qubits, $\mathit{xx}$ (which is a register in the middle of Fig. 5 in the paper) uses $2N_\mathit{len}-1$ qubits, $c$ (which is $c$ for ADDER MOD) uses $2N_\mathit{len}-1$ qubits, $M$ (which is $M$ for ADDER MOD) uses $2N_\mathit{len}-1$ qubits, and $t$ (which is $t$ for ADDER MOD) uses 1 qubit.
+
+    Args:
+        a (int): $a$
+        M (int): $M$ (see `adder_modM`)
+        N_len (int): a number of bits for representing $x$
+
+    Returns:
+        its gate
+    """
+
     M_val = M
     N_len = N_len
 
@@ -117,6 +159,18 @@ def ctrl_multi_modM(a: int, M: int, N_len: int) -> Gate:
     return qc.to_gate()
 
 def ax_modM(a: int, M: int, N_len: Optional[int] = None, x_0_at_first: bool = True) -> Gate:
+    r"""Modular exponentiation, $a^x\mod M$. It requires $10N_\mathit{len}-2$ qubits: $x$ uses $N_\mathit{len}$ qubits, $\mathit{x\ for\ Ctrl\ MULT\ MOD}$ uses $N_\mathit{len}$ qubits, $y$ uses $2N_\mathit{len}$ qubits, $\mathit{xx}$ uses $2N_\mathit{len}-1$ qubits, $c$ (which is $c$ for ADDER MOD) uses $2N_\mathit{len}-1$ qubits, $M$ (which is $M$ for ADDER MOD) uses $2N_\mathit{len}-1$ qubits, and $t$ (which is $t$ for ADDER MOD) uses 1 qubit.
+
+    Args:
+        a (int): $a$
+        M (int): $M$ (see `adder_modM`)
+        N_len (int): a number of bits for representing $x$
+        x_0_at_first (bool): if True, it adds 1 into the target register before calculating modular exponentiation
+
+    Returns:
+        its gate
+    """
+
     M_val = M
     if N_len is None:
         N_len = int(np.ceil(np.log2(M)))
