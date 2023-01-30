@@ -11,64 +11,44 @@ from sympy.ntheory.continued_fraction import continued_fraction, continued_fract
 
 from qft import qft
 from elementary import ax_modM
+from order_finding import order_finding
 
 
-def shor(M: int, a: Optional[int] = None, N_len: Optional[int] = None, show_hist: bool = True, use_only_period: bool = False):
-    if a is None:
-        random.randint(2, M - 1)
-    gcd = math.gcd(a, M)
-    if gcd != 1:
-        print(f'Answer is found in only classical computation: {gcd}')
-        return gcd
+def shor(N: int, show_hist: bool = True):
+    """Shor's factoring algorithm: given $N\in\mathbb{Z}$, it finds a prime factor of $N$.
 
-    if N_len is None:
-        N_len = int(np.ceil(np.log2(M ** 2)))
-    N = 2 ** N_len
-    qc = QuantumCircuit(10 * N_len - 2, N_len)
+    Args:
+        N (int): $N$
 
-    qc.h(range(N_len))
+    Returns:
+        A prime factor of $N$
+    """
 
-    qc.append(ax_modM(a=a, M=M, N_len=N_len), range(10 * N_len - 2))
+    if N % 2 == 0:
+        return 2
 
-    qc.append(qft(n=N_len), range(N_len))
+    for _ in range(N):
+        a = random.randint(2, N - 1)
+        gcd = math.gcd(a, N)
+        if gcd != 1:
+            return gcd
 
-    qc.measure(range(N_len), range(N_len))
+        r = order_finding(x=a, N=N, show_hist=show_hist)
 
-    backend = Aer.get_backend('aer_simulator_matrix_product_state')#('aer_simulator')
-    qc = transpile(qc, backend)
-    job = backend.run(qc, shots=10000)
-    hist = job.result().get_counts()
-
-    if show_hist:
-        plot_histogram(hist)
-        plt.show()
-
-    print(sorted(hist.items(), key=lambda x: x[1], reverse=True))
-    y_list = []
-    for measured_key, _ in sorted(hist.items(), key=lambda x: x[1], reverse=True):
-        y = int(measured_key[-N_len:], 2)
-        if y == 0:
+        if r % 2 == 1:
+            continue
+        if (x ** (r // 2) + 1) % N == 0:
             continue
 
-        for fraction in continued_fraction_convergents(continued_fraction(Rational(y, N))):
-            maybe_r = fraction.denominator
-            if maybe_r != 1 and maybe_r < M and a ** maybe_r % M == 1:
-                if use_only_period:
-                    return maybe_r
+        factor_candidate = math.gcd(x ** (r // 2) - 1, N)
+        if N % factor_candidate == 0:
+            return factor_candidate
+        factor_candidate = math.gcd(x ** (r // 2) + 1, N)
+        if N % factor_candidate == 0:
+            return factor_candidate
 
-                if maybe_r % 2 == 1 or (a ** (maybe_r // 2) + 1) % M == 0:
-                    continue
-                gcd = math.gcd(a ** (maybe_r // 2) + 1, M)
-                if gcd != 1:
-                    return gcd
-                gcd = math.gcd(a ** (maybe_r // 2) - 1, M)
-                if gcd != 1:
-                    return gcd
+    raise Exception('A prime factor is Not found!')
 
-    print('gcd was not found?!')
 
 if __name__ == '__main__':
-    print(shor(M=8, a=3))
-    #print(shor(M=57, a=5))
-    #print(shor(M=7, a=3, N_len=3, use_only_period=True))
-    #print(shor(M=7, a=3, use_only_period=True))
+    print(shor(N=9))
