@@ -12,8 +12,9 @@ from qft import qft
 from elementary import ax_modM
 from classical_utils import lcm
 
-def order_finding(x: int, N: int, epsilon: Optional[float] = 0.2, show_hist: Optional[bool] = False) -> int:
-    """Order-finding algorithm: it finds $r$ of $x^r\equiv 1\pmod N$. It requires 
+def order_finding(x: int, N: int, show_hist: Optional[bool] = False) -> int:
+#def order_finding(x: int, N: int, epsilon: Optional[float] = 0.2, show_hist: Optional[bool] = False) -> int:
+    r"""Order-finding algorithm: it finds $r$ of $x^r\equiv 1\pmod N$. It requires 
 
     Args:
         x (int): $x$
@@ -21,10 +22,23 @@ def order_finding(x: int, N: int, epsilon: Optional[float] = 0.2, show_hist: Opt
 
     Returns:
         order $r$
+
+    Examples:
+
+    ```
+    >>> order_finding(x=3, N=5, show_hist=True)
+    4
+    ```
+
+    and get below image in `img` directory:  
+    ![](../img/order_finding_x3_N5.png)  
+    It represents $0/2^6=0$, $2^4/2^6=1/4$, $2^5/2^6=1/2$, and $(2^4+2^5)/2^6=3/4$ from the left.
+    This answer is $r=4$, so $1/2$ looks wrong.
+    However, $\tilde{r}=2$ is a factor of $r$, so we can get correct $r$ by lcm with another $\tilde{r}$.
     """
 
     L = int(np.ceil(np.log2(N)))
-    t = 2 * L# + 1 + int(np.ceil(np.log2(3 + 1 / (2 * epsilon))))
+    t = 2 * L# + 1 + int(np.ceil(np.log2(3 + 1 / (2 * epsilon)))) # epsilon requires too many qubits to run this program...
 
     first_register = QuantumRegister(t)
     second_register = QuantumRegister(2 * t)
@@ -54,7 +68,8 @@ def order_finding(x: int, N: int, epsilon: Optional[float] = 0.2, show_hist: Opt
 
     if show_hist:
         plot_histogram(hist)
-        plt.savefig(f'img/order_finding_x{x}_N{N}_eps{epsilon}.png', bbox_inches='tight')
+        plt.savefig(f'img/order_finding_x{x}_N{N}.png', bbox_inches='tight')
+        #plt.savefig(f'img/order_finding_x{x}_N{N}_eps{epsilon}.png', bbox_inches='tight')
 
     all_fractions = []
     for measured_key, _ in sorted(hist.items(), key=lambda x: x[1], reverse=True):

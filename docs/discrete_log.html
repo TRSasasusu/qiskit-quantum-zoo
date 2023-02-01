@@ -57,9 +57,6 @@
             <li>
                     <a class="function" href="#discrete_log">discrete_log</a>
             </li>
-            <li>
-                    <a class="function" href="#moduro">moduro</a>
-            </li>
     </ul>
 
 
@@ -150,13 +147,10 @@ discrete_log    </h1>
 </span><span id="L-67"><a href="#L-67"><span class="linenos">67</span></a>
 </span><span id="L-68"><a href="#L-68"><span class="linenos">68</span></a>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;d was not found?!&#39;</span><span class="p">)</span>
 </span><span id="L-69"><a href="#L-69"><span class="linenos">69</span></a>
-</span><span id="L-70"><a href="#L-70"><span class="linenos">70</span></a><span class="k">def</span> <span class="nf">moduro</span><span class="p">():</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos">71</span></a>    <span class="n">qc</span> <span class="o">=</span> <span class="n">QuantumCircuit</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos">72</span></a>
-</span><span id="L-73"><a href="#L-73"><span class="linenos">73</span></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-</span><span id="L-74"><a href="#L-74"><span class="linenos">74</span></a>    <span class="nb">print</span><span class="p">(</span><span class="n">discrete_log</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">N_len</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos">75</span></a>    <span class="c1">#print(discrete_log(alpha=3, beta=6, p=7))</span>
-</span><span id="L-76"><a href="#L-76"><span class="linenos">76</span></a>    <span class="c1">#discrete_log(alpha=3, beta=1, p=4, N_len=2)</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos">70</span></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos">71</span></a>    <span class="nb">print</span><span class="p">(</span><span class="n">discrete_log</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">N_len</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos">72</span></a>    <span class="c1">#print(discrete_log(alpha=3, beta=6, p=7))</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos">73</span></a>    <span class="c1">#discrete_log(alpha=3, beta=1, p=4, N_len=2)</span>
 </span></pre></div>
 
 
@@ -166,7 +160,7 @@ discrete_log    </h1>
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">discrete_log</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">alpha</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">beta</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">p</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">N_len</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">show_hist</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span></span><span class="return-annotation">) -> <span class="nb">int</span>:</span></span>
+        <span class="name">discrete_log</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">alpha</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">beta</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">p</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">N_len</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">NoneType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">show_hist</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">NoneType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span></span><span class="return-annotation">) -> <span class="nb">int</span>:</span></span>
 
                 <label class="view-source-button" for="discrete_log-view-source"><span>View Source</span></label>
 
@@ -225,25 +219,6 @@ discrete_log    </h1>
 </span><span id="discrete_log-67"><a href="#discrete_log-67"><span class="linenos">67</span></a>                <span class="k">return</span> <span class="n">d</span>
 </span><span id="discrete_log-68"><a href="#discrete_log-68"><span class="linenos">68</span></a>
 </span><span id="discrete_log-69"><a href="#discrete_log-69"><span class="linenos">69</span></a>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;d was not found?!&#39;</span><span class="p">)</span>
-</span></pre></div>
-
-
-    
-
-                </section>
-                <section id="moduro">
-                            <input id="moduro-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-<div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">moduro</span><span class="signature pdoc-code condensed">(<span class="return-annotation">):</span></span>
-
-                <label class="view-source-button" for="moduro-view-source"><span>View Source</span></label>
-
-    </div>
-    <a class="headerlink" href="#moduro"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="moduro-71"><a href="#moduro-71"><span class="linenos">71</span></a><span class="k">def</span> <span class="nf">moduro</span><span class="p">():</span>
-</span><span id="moduro-72"><a href="#moduro-72"><span class="linenos">72</span></a>    <span class="n">qc</span> <span class="o">=</span> <span class="n">QuantumCircuit</span>
 </span></pre></div>
 
 

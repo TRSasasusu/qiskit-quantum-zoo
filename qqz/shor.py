@@ -14,7 +14,7 @@ from elementary import ax_modM
 from order_finding import order_finding
 
 
-def shor(N: int, show_hist: bool = True):
+def shor(N: int, show_hist: bool = False):
     """Shor's factoring algorithm: given $N\in\mathbb{Z}$, it finds a prime factor of $N$.
 
     Args:
@@ -22,6 +22,13 @@ def shor(N: int, show_hist: bool = True):
 
     Returns:
         A prime factor of $N$
+
+    Examples:
+
+    ```
+    >>> shor(N=9)
+    3
+    ```
     """
 
     if N % 2 == 0:
