@@ -4,70 +4,100 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from sympy import gcdex
-from qiskit import QuantumCircuit, Aer, transpile, assemble
+from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, Aer, transpile, assemble
 from qiskit.visualization import plot_histogram
-from sympy import Rational
+from sympy import Rational, gcdex
 from sympy.ntheory.continued_fraction import continued_fraction, continued_fraction_convergents
 
 from qft import qft
 from elementary import ax_modM
-from shor import shor
+from order_finding import order_finding
+from classical_utils import decode_bin
 
-def discrete_log(alpha: int, beta: int, p: int, N_len: Optional[int] = None, show_hist: Optional[bool] = True) -> int:
-    # find d s.t. alpha^d = beta
-    if N_len is None:
-        N_len = int(np.ceil(np.log2(p ** 2)))
-    N = 2 ** N_len
-    qc = QuantumCircuit(11 * N_len - 2, N_len * 2)
+def discrete_log(a: int, b: int, p: int, show_hist: Optional[bool] = False) -> int:
+    """Shor's discrete log algorithm: given $a,b,p\in\mathbb{Z}$, it finds $s$ such that $a^s\equiv b\pmod p$.
 
-    qc.h(range(N_len * 2))
+    Args:
+        a (int): $a$
+        b (int): $b$
+        p (int): $p$
+    """
 
-    qc.append(ax_modM(a=alpha, M=p, N_len=N_len), list(range(N_len)) + list(range(N_len * 2, 11 * N_len - 2)))
-    qc.append(ax_modM(a=beta, M=p, N_len=N_len, x_0_at_first=False), range(N_len, 11 * N_len - 2))
+    r = order_finding(x=a, N=p, show_hist=False)
+    t = int(np.ceil(np.log2(p)))
 
-    qc.append(qft(n=N_len), range(N_len))
-    qc.append(qft(n=N_len), range(N_len, N_len * 2))
+    first_register = QuantumRegister(t)
+    second_register = QuantumRegister(t)
+    third_register = QuantumRegister(2 * t)
+    auxiliary_register_mid = QuantumRegister(t)
+    auxiliary_register_end = QuantumRegister(6 * t - 2)
+    classical_register = ClassicalRegister(2 * t)
 
-    qc.measure(range(N_len * 2), range(N_len * 2))
+    qc = QuantumCircuit(
+        first_register,
+        second_register,
+        third_register,
+        auxiliary_register_mid,
+        auxiliary_register_end,
+        classical_register,
+    )
 
-    backend = Aer.get_backend('aer_simulator_matrix_product_state')
+    qc.h(first_register)
+    qc.h(second_register)
+
+    qc.append(ax_modM(a=b, M=p, N_len=t), list(first_register) + list(auxiliary_register_mid) + list(third_register) + list(auxiliary_register_end))
+    qc.append(ax_modM(a=a, M=p, N_len=t, x_0_at_first=False), list(second_register) + list(auxiliary_register_mid) + list(third_register) + list(auxiliary_register_end))
+
+    qc.append(qft(n=t).inverse(), first_register)
+    qc.append(qft(n=t).inverse(), second_register)
+
+    qc.measure(list(first_register) + list(second_register), classical_register)
+    #qc.measure(third_register, classical_register)
+
+    backend = Aer.get_backend('aer_simulator_matrix_product_state')#('aer_simulator')
     qc = transpile(qc, backend)
     job = backend.run(qc, shots=10000)
     hist = job.result().get_counts()
 
     if show_hist:
-        plot_histogram(hist)
-        plt.show()
+        figsize_x = max(7 * (len(hist) // 8), 7)
+        plot_histogram(hist, figsize=(figsize_x, 5))
+        plt.savefig(f'img/discrete_log_a{a}_b{b}_p{p}_r{r}.png', bbox_inches='tight')
 
     for measured_key, _ in sorted(hist.items(), key=lambda x: x[1], reverse=True):
-        x = int(measured_key[-N_len:], 2)
-        y = int(measured_key[-N_len * 2:-N_len], 2)
+        tilde_l_per_r = Rational(decode_bin(measured_key[:t]), 2 ** t) # decoded from second register: $\widetilde{l/r}$
+        if tilde_l_per_r == 0:
+            continue
 
-        for fraction in continued_fraction_convergents(continued_fraction(Rational(y, N))):
-            if fraction.denominator == p - 1:
-                yy = fraction.numerator
-            elif (p - 1) % fraction.denominator == 0:
-                yy = fraction.numerator * ((p - 1) // fraction.denominator)
-            else:
-                continue
+        l = None
+        for fraction in continued_fraction_convergents(continued_fraction(tilde_l_per_r)):
+            if fraction.denominator == r:
+                l = fraction.numerator # get correct $l$
+                break
 
-            c = Rational(x * (p - 1) - (x * (p - 1) % N)) / N
-            if c == 0:
-                continue
+        if l is None:
+            continue
 
-            d, m, _ = gcdex(c, 1 - p)
-            d *= -yy
-            m *= -yy
-            #print(f'x: {x}, y: {y}')
-            if alpha ** d % p == beta:
-                return d
-            d += 1 - p
-            if alpha ** d % p == beta:
-                return d
+        tilde_beta_per_r = Rational(decode_bin(measured_key[-t:]), 2 ** t) # decoded from first register: $\widetilde{\beta/r}$
+        if tilde_beta_per_r == 0:
+            continue
 
-    print('d was not found?!')
+        beta = None
+        for fraction in continued_fraction_convergents(continued_fraction(tilde_beta_per_r)):
+            if fraction.denominator == r:
+                beta = fraction.numerator # get correct $\beta$
+                break
+
+        if beta is None:
+            continue
+
+        s, alpha, _ = gcdex(l, -r)
+        s = int(s)
+        if pow(a, s, p) == b:
+            return s
+
+    raise Exception('s is NOT found!')
+
 
 if __name__ == '__main__':
-    print(discrete_log(alpha=3, beta=6, p=7, N_len=3))
-    #print(discrete_log(alpha=3, beta=6, p=7))
-    #discrete_log(alpha=3, beta=1, p=4, N_len=2)
+    print(discrete_log(a=2, b=4, p=7, show_hist=True))
