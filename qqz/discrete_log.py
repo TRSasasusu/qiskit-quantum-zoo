@@ -92,7 +92,7 @@ def discrete_log(a: int, b: int, p: int, show_hist: Optional[bool] = False) -> i
             continue
 
         s, alpha, _ = gcdex(l, -r)
-        s = int(s)
+        s = int(s * beta)
         if pow(a, s, p) == b:
             return s
 
