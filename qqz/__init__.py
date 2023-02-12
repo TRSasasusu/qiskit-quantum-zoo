@@ -1,7 +1,5 @@
 """
 .. include:: ../README.md
-
-this is title page.
 """
 
 from .classical_utils import *
