@@ -14,7 +14,7 @@ from elementary import ax_modM
 from order_finding import order_finding
 from classical_utils import decode_bin
 
-def discrete_log(a: int, b: int, p: int, show_hist: Optional[bool] = False) -> int:
+def discrete_log(a: int, b: int, p: int, show_hist: Optional[bool] = False, coef_t: Optional[int] = 1) -> int:
     """Shor's discrete log algorithm: given $a,b,p\in\mathbb{Z}$, it finds $s$ such that $a^s\equiv b\pmod p$.
 
     Args:
@@ -24,7 +24,7 @@ def discrete_log(a: int, b: int, p: int, show_hist: Optional[bool] = False) -> i
     """
 
     r = order_finding(x=a, N=p, show_hist=False)
-    t = int(np.ceil(np.log2(p)))
+    t = coef_t * int(np.ceil(np.log2(p)))
 
     first_register = QuantumRegister(t)
     second_register = QuantumRegister(t)
@@ -62,7 +62,7 @@ def discrete_log(a: int, b: int, p: int, show_hist: Optional[bool] = False) -> i
     if show_hist:
         figsize_x = max(7 * (len(hist) // 8), 7)
         plot_histogram(hist, figsize=(figsize_x, 5))
-        plt.savefig(f'img/discrete_log_a{a}_b{b}_p{p}_r{r}.png', bbox_inches='tight')
+        plt.savefig(f'img/discrete_log_a{a}_b{b}_p{p}_r{r}_t{t}.png', bbox_inches='tight')
 
     for measured_key, _ in sorted(hist.items(), key=lambda x: x[1], reverse=True):
         tilde_l_per_r = Rational(decode_bin(measured_key[:t]), 2 ** t) # decoded from second register: $\widetilde{l/r}$
@@ -100,4 +100,5 @@ def discrete_log(a: int, b: int, p: int, show_hist: Optional[bool] = False) -> i
 
 
 if __name__ == '__main__':
-    print(discrete_log(a=2, b=4, p=7, show_hist=True))
+    #print(discrete_log(a=2, b=4, p=7, show_hist=True))
+    print(discrete_log(a=3, b=5, p=11, show_hist=True, coef_t=2))
