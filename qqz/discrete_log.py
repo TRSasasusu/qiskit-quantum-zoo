@@ -80,6 +80,8 @@ def discrete_log(a: int, b: int, p: int, show_hist: Optional[bool] = False, coef
 
         tilde_beta_per_r = Rational(decode_bin(measured_key[-t:]), 2 ** t) # decoded from first register: $\widetilde{\beta/r}$
         if tilde_beta_per_r == 0:
+            if pow(a, 0, p) == b: # the case where b == 1
+                return r # returning 0 is also ok
             continue
 
         beta = None
@@ -101,4 +103,5 @@ def discrete_log(a: int, b: int, p: int, show_hist: Optional[bool] = False, coef
 
 if __name__ == '__main__':
     #print(discrete_log(a=2, b=4, p=7, show_hist=True))
-    print(discrete_log(a=3, b=5, p=11, show_hist=True, coef_t=2))
+    #print(discrete_log(a=3, b=5, p=11, show_hist=True, coef_t=2))
+    print(discrete_log(a=2, b=1, p=3, show_hist=True, coef_t=1))
